@@ -160,15 +160,15 @@ int SM2_Tick(int state)
 			// 			PORTA = 0x00;
 			state = send_SB;
 		}
-		else if(ON == '2')
+		else if(ON == '3')
 		{
 			state = send_JJ;
 		}
-		else if(ON == '3')
+		else if(ON == '4')
 		{
 			state = send_PU;
 		}
-		else if(ON == '4')
+		else if(ON == '2')
 		{
 			state = send_SU;
 		}
@@ -210,7 +210,7 @@ int SM2_Tick(int state)
 	//========ACTIONS===========
 	switch(state){
 		case init2:
-		count = 0;
+		count = 0x00;
 		gyro_accel_x = 0;
 		gyro_accel_y = 0;
 		gyro_accel_z = 0;
@@ -270,51 +270,7 @@ int SM2_Tick(int state)
 				PORTA = 0x01;
 			}
 		}
-		// 		else if (count >=20)
-		// 		{
-		// 			if(Ya >= 2)
-		// 			{
-		// 				unsigned char sending = 0x01;
-		// 				USART_Flush(0);
-		// 				if(USART_IsSendReady(0))
-		// 				USART_Send(sending,0);//send a bit to progress state of exercise
-		// 				while(!USART_HasTransmitted(0))
-		// 				{
-		// 					//wait until transmittedP
-		// 					PORTA = 0x00;
-		// 				}
-		//
-		// 				PORTA = 0x01;
-		// 			}
-		// 		}
-		// 		else if (count >=30)
-		// 		{
-		// 			if(Ya >= 1 && Za >= 1)
-		// 			{
-		// 				unsigned char sending = 0x01;
-		// 				USART_Flush(0);
-		// 				if(USART_IsSendReady(0))
-		// 				USART_Send(sending,0);//send a bit to progress state of exercise
-		// 				while(!USART_HasTransmitted(0))
-		// 				{
-		// 					//wait until transmittedP
-		// 					PORTA = 0x00;
-		// 				}
-		//
-		// 				PORTA = 0x01;
-		// 			}
-		// 		}
 
-		// 		else if(Za < 0.5)//resting fist is going to be pointed up so Za won't much applied force
-		// 		{
-		// 			USART_Flush(0);
-		// 			if(USART_IsSendReady(0))
-		// 			USART_Send(0x00,0);//send a bit to progress state of exercise
-		// 			while(!USART_HasTransmitted(0))
-		// 			{
-		// 				//wait until transmitted
-		// 			}
-		// 		}
 		break;
 		
 		case send_JJ://jumping jacks receive data
@@ -324,28 +280,37 @@ int SM2_Tick(int state)
 		// 			PORTA = ON;
 		// 			USART_Flush(0);
 		// 		}
-		
-		if(Xa >= 0.4 && Za >= 0.5)
-		{
-			USART_Flush(1);
-			if(USART_IsSendReady(1))
-			USART_Send(0x01,1);//send a bit to progress state of exercise
-			while(!USART_HasTransmitted(1))
+			count++;
+			if( (Ya > 0) && (gyro_accel_y >= 0) && (count >= 20))
 			{
-				//wait until transmitted
+				count = 0;
+				unsigned char sending = 0x01;
+				USART_Flush(1);
+				if(USART_IsSendReady(1))
+				USART_Send(sending,1);//send a bit to progress state of exercise
+				while(!USART_HasTransmitted(1))
+				{
+					//wait until transmittedP
+					PORTA = 0x00;
+				}
+				gyro_accel_y = Ya;
+				PORTA = 0x01;
 			}
-			
-		}
-		else if(Xa < 0.4)//hands will be moving down for jumping jacks
-		{
-			USART_Flush(1);
-			if(USART_IsSendReady(1))
-			USART_Send(0x00,1);//send a bit to progress state of exercise
-			while(!USART_HasTransmitted(1))
+			else if((Ya <= 0) && (gyro_accel_y > 0) && (count >=20))
 			{
-				//wait until transmitted
+				count = 0;
+				unsigned char sending = 0x00;
+				USART_Flush(1);
+				if(USART_IsSendReady(1))
+				USART_Send(sending,1);//send a bit to progress state of exercise
+				while(!USART_HasTransmitted(1))
+				{
+					//wait until transmittedP
+					PORTA = 0x00;
+				}
+				gyro_accel_y = Ya;
+				PORTA = 0x01;
 			}
-		}
 		break;
 		
 		case send_PU:
@@ -375,8 +340,11 @@ int SM2_Tick(int state)
 		// 			PORTA = ON;
 		// 			USART_Flush(0);
 		// 		}
-		if(Za < 0)//send data once user is in sit-up position
+		count++;
+		
+		if((Za < 0) &&  (count >= 20))//send data once user is in sit-up position
 		{
+			count = 0;
 			USART_Flush(1);
 			if(USART_IsSendReady(1))
 			USART_Send(0x01,1);//send a bit to progress state of exercise
@@ -384,16 +352,19 @@ int SM2_Tick(int state)
 			{
 				//wait until transmitted
 			}
+			gyro_accel_z = Za;
 		}
-		else if(Xa > 0.5)
+		else if((Xa > 0.5) && (count >= 20))
 		{
+			count = 0;
 			USART_Flush(1);
 			if(USART_IsSendReady(1))
-			USART_Send(0x00,1);//send a bit to progress state of exercise
+			USART_Send(0x00,0);//send a bit to progress state of exercise
 			while(!USART_HasTransmitted(1))
 			{
 				//wait until transmitted
 			}
+			gyro_accel_x = Xa;
 		}
 		break;
 		
@@ -506,3 +477,4 @@ int main()
 // 		dtostrf( Zg, 3, 2, float_ );
 // 		sprintf(buffer," Gz = %s%c/s\r\n",float_,0xF8);
 // 		USART_SendString(buffer);
+
