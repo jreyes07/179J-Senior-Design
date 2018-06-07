@@ -151,10 +151,10 @@ int SM2_Tick(int state)
 		case wait2:
 		//breakdown: SB = 1, SU = 2, JJ = 3, PU = 4
 
-// 		choice = ON;
+		// 		choice = ON;
 		if(ON == '1')
 		{
-// 			PORTA = 0x00;
+			// 			PORTA = 0x00;
 			state = send_SB;
 		}
 		else if(ON == '2')
@@ -163,7 +163,7 @@ int SM2_Tick(int state)
 		}
 		else if(ON == '3')
 		{
-			state = send_PU;			
+			state = send_PU;
 		}
 		else if(ON == '4')
 		{
@@ -217,88 +217,90 @@ int SM2_Tick(int state)
 			choice = ON;
 			USART_Flush(1);
 		}
-// 		PORTA = 0x00;
+		// 		PORTA = 0x00;
 		break;
 		
 		case send_SB:
 
-// 		if(USART_HasReceived(0))
-// 		{
-// 			ON = USART_Receive(0);
-// 			PORTA = ON;
-// 			USART_Flush(0);
-// 		}
-
-			if(Ya >= 1.5)
-			{
-				unsigned char sending = 0x01;
-				USART_Flush(1);
-				if(USART_IsSendReady(1))
-				USART_Send(sending,1);//send a bit to progress state of exercise
-				while(!USART_HasTransmitted(1))
-				{
-					//wait until transmittedP
-// 					PORTA = 0x00;
-				}
-				USART_Flush(1);
-				count++;
-				PORTA = 0x01;
-			}
+		 		if(USART_HasReceived(1))
+		 		{
+		 			ON = USART_Receive(1);
+		 			PORTA = ON;
+		 			USART_Flush(1);
+		 		}
 		
-// 		else if (count >=20)
-// 		{
-// 			if(Ya >= 2)
-// 			{
-// 				unsigned char sending = 0x01;
-// 				USART_Flush(1);
-// 				if(USART_IsSendReady(1))
-// 				USART_Send(sending,1);//send a bit to progress state of exercise
-// 				while(!USART_HasTransmitted(1))
-// 				{
-// 					//wait until transmittedP
-// 					PORTA = 0x00;
-// 				}
-// 				count++;
-// 				PORTA = 0x01;
-// 			}		
-// 		}
-// 		else if (count >=30)
-// 		{
-// 					if(Ya >= 2)
-// 					{
-// 						unsigned char sending = 0x01;
-// 						USART_Flush(1);
-// 						if(USART_IsSendReady(1))
-// 						USART_Send(sending,1);//send a bit to progress state of exercise
-// 						while(!USART_HasTransmitted(1))
-// 						{
-// 							//wait until transmittedP
-// 							PORTA = 0x00;
-// 						}
-// 						count++;
-// 						PORTA = 0x01;
-// 					}
-// 		}
+		if(ON > 0x00)
+		{		
+		if(Ya >= 1.1)
+		{
+			unsigned char sending = 0x01;
+			USART_Flush(1);
+			if(USART_IsSendReady(1))
+			USART_Send(sending,1);//send a bit to progress state of exercise
+			while(!USART_HasTransmitted(1))
+			{
+				//wait until transmittedP
+				// 					PORTA = 0x00;
+			}
+			USART_Flush(1);
+			count++;
+			PORTA = 0x01;
+		}
+		}
+		// 		else if (count >=20)
+		// 		{
+		// 			if(Ya >= 2)
+		// 			{
+		// 				unsigned char sending = 0x01;
+		// 				USART_Flush(1);
+		// 				if(USART_IsSendReady(1))
+		// 				USART_Send(sending,1);//send a bit to progress state of exercise
+		// 				while(!USART_HasTransmitted(1))
+		// 				{
+		// 					//wait until transmittedP
+		// 					PORTA = 0x00;
+		// 				}
+		// 				count++;
+		// 				PORTA = 0x01;
+		// 			}
+		// 		}
+		// 		else if (count >=30)
+		// 		{
+		// 					if(Ya >= 2)
+		// 					{
+		// 						unsigned char sending = 0x01;
+		// 						USART_Flush(1);
+		// 						if(USART_IsSendReady(1))
+		// 						USART_Send(sending,1);//send a bit to progress state of exercise
+		// 						while(!USART_HasTransmitted(1))
+		// 						{
+		// 							//wait until transmittedP
+		// 							PORTA = 0x00;
+		// 						}
+		// 						count++;
+		// 						PORTA = 0x01;
+		// 					}
+		// 		}
 
-// 		else if(Za < 0.5)//resting fist is going to be pointed up so Za won't much applied force
-// 		{
-// 			USART_Flush(0);
-// 			if(USART_IsSendReady(0))
-// 			USART_Send(0x00,0);//send a bit to progress state of exercise
-// 			while(!USART_HasTransmitted(0))
-// 			{
-// 				//wait until transmitted
-// 			}
-// 		}
+		// 		else if(Za < 0.5)//resting fist is going to be pointed up so Za won't much applied force
+		// 		{
+		// 			USART_Flush(0);
+		// 			if(USART_IsSendReady(0))
+		// 			USART_Send(0x00,0);//send a bit to progress state of exercise
+		// 			while(!USART_HasTransmitted(0))
+		// 			{
+		// 				//wait until transmitted
+		// 			}
+		// 		}
 		break;
 		
 		case send_JJ://jumping jacks receive data
-// 		if(USART_HasReceived(0))
-// 		{
-// 			ON = USART_Receive(0);
-// 			PORTA = ON;
-// 			USART_Flush(0);
-// 		}
+		// 		if(USART_HasReceived(0))
+		// 		{
+		// 			ON = USART_Receive(0);
+		// 			PORTA = ON;
+		// 			USART_Flush(0);
+		// 		}
 		
 		if(Xa >= 0.4 && Za >= 0.5)
 		{
@@ -324,12 +326,12 @@ int SM2_Tick(int state)
 		break;
 		
 		case send_PU:
-// 		if(USART_HasReceived(0))
-// 		{
-// 			ON = USART_Receive(0);
-// 			PORTA = ON;
-// 			USART_Flush(0);
-// 		}
+		// 		if(USART_HasReceived(0))
+		// 		{
+		// 			ON = USART_Receive(0);
+		// 			PORTA = ON;
+		// 			USART_Flush(0);
+		// 		}
 		
 		if(Za >= 0.5)//send data once user is in push-up position
 		{
@@ -344,12 +346,12 @@ int SM2_Tick(int state)
 		break;
 		
 		case send_SU:
-// 		if(USART_HasReceived(0))
-// 		{
-// 			ON = USART_Receive(0);
-// 			PORTA = ON;
-// 			USART_Flush(0);
-// 		}
+		// 		if(USART_HasReceived(0))
+		// 		{
+		// 			ON = USART_Receive(0);
+		// 			PORTA = ON;
+		// 			USART_Flush(0);
+		// 		}
 		if(Za < 0)//send data once user is in sit-up position
 		{
 			USART_Flush(1);
@@ -361,7 +363,7 @@ int SM2_Tick(int state)
 			}
 		}
 		else if(Xa > 0.5)
-		{			
+		{
 			USART_Flush(1);
 			if(USART_IsSendReady(1))
 			USART_Send(0x00,1);//send a bit to progress state of exercise
@@ -390,7 +392,7 @@ int main()
 	
 	I2C_Init();											/* Initialize I2C */
 	MPU6050_Init();										/* Initialize MPU6050 */
-// 	initUSART(0);	//0 for left hand					/* Initialize USART with 9600 baud rate */
+	// 	initUSART(0);	//0 for left hand					/* Initialize USART with 9600 baud rate */
 	initUSART(1); //1 for right hand
 	
 	//declare number of tasks using tasksNum
