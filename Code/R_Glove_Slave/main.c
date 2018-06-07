@@ -1,5 +1,4 @@
 
-
 /*
 * ATmega16 Interface with MPU-6050
 * http://www.electronicwings.com
@@ -141,7 +140,7 @@ int SM1_Tick(int state)
 enum SM2_States{init2,wait2,send_SB, send_JJ,send_PU,send_SU};//send info for "ShadowBoxing", "JumpingJacks", "PushUps", "SitUps"
 int SM2_Tick(int state)
 {//start of SM2_Tick
-	static unsigned char count;
+	static double count;
 	static  float gyro_accel_x;
 	static  float gyro_accel_y;
 	static  float gyro_accel_z;
@@ -211,7 +210,7 @@ int SM2_Tick(int state)
 	//========ACTIONS===========
 	switch(state){
 		case init2:
-		count = 0x00;
+		count = 0;
 		gyro_accel_x = 0;
 		gyro_accel_y = 0;
 		gyro_accel_z = 0;
@@ -239,9 +238,10 @@ int SM2_Tick(int state)
 		// 		count++;
 		if(ON > 0x00)
 		{
-			if( (Ya >= 1.4) && (gyro_accel_y < 1.4))
+			count++;
+			if( (Ya >= 1.4) && (gyro_accel_y < 1.4) && (count >= 20))
 			{
-				
+				count = 0;
 				unsigned char sending = 0x01;
 				USART_Flush(1);
 				if(USART_IsSendReady(1))
@@ -254,9 +254,9 @@ int SM2_Tick(int state)
 				gyro_accel_y = Ya;
 				PORTA = 0x01;
 			}
-			else if((Ya < 1.4) && (gyro_accel_y >= 1.4))
+			else if((Ya < 1.4) && (gyro_accel_y >= 1.4) && (count >=20))
 			{
-				
+				count = 0;
 				unsigned char sending = 0x00;
 				USART_Flush(1);
 				if(USART_IsSendReady(1))
@@ -506,4 +506,3 @@ int main()
 // 		dtostrf( Zg, 3, 2, float_ );
 // 		sprintf(buffer," Gz = %s%c/s\r\n",float_,0xF8);
 // 		USART_SendString(buffer);
-
