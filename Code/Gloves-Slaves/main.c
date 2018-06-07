@@ -230,10 +230,10 @@ int SM2_Tick(int state)
 			PORTA = ON;
 			USART_Flush(0);
 		}
-		count++;
+// 		count++;
 		if(ON > 0x00)
 		{
-			if(Ya >= 0.7)
+			if(Ya >= 1.4)
 			{
 				unsigned char sending = 0x01;
 				USART_Flush(0);
@@ -244,7 +244,6 @@ int SM2_Tick(int state)
 					//wait until transmittedP
 					PORTA = 0x00;
 				}
-				USART_Flush(0);
 				PORTA = 0x01;
 			}
 		}
