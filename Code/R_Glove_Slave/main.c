@@ -1,3 +1,5 @@
+
+
 /*
 * ATmega16 Interface with MPU-6050
 * http://www.electronicwings.com
@@ -79,9 +81,7 @@ enum SM1_States { init,wait,gyro};
 int SM1_Tick(int state)
 {//Start of SM1_Tick
 	//======Local Variables=========
-	static unsigned char gyro_accel_x = 0x00;
-	static unsigned char gyro_accel_y = 0x00;
-	static unsigned char gyro_accel_z = 0x00;
+
 	static unsigned char buffer[20];
 	static unsigned char float_[10];
 	
@@ -100,10 +100,10 @@ int SM1_Tick(int state)
 		break;
 		
 		case gyro:
-		if(ON == 0x00)
-		{
-			state = wait;
-		}
+// 		if(ON == 0x00)
+// 		{
+// 			state = wait;
+// 		}
 		break;
 		
 		default:
@@ -141,10 +141,14 @@ int SM1_Tick(int state)
 enum SM2_States{init2,wait2,send_SB, send_JJ,send_PU,send_SU};//send info for "ShadowBoxing", "JumpingJacks", "PushUps", "SitUps"
 int SM2_Tick(int state)
 {//start of SM2_Tick
-	static unsigned char count = 0x00;
+				static unsigned char count;
+				static  float gyro_accel_x;
+				static  float gyro_accel_y;
+				static  float gyro_accel_z;
 	//=====TRANSITIONS==========
 	switch(state){
 		case init2:
+
 		state = wait2;
 		break;
 		
@@ -172,10 +176,10 @@ int SM2_Tick(int state)
 		break;
 		
 		case send_SB://0x01
-		if(ON == 0x00)
-		{
-			state = wait2;
-		}
+// 		if(ON == 0x00)
+// 		{
+// 			state = wait2;
+// 		}
 		break;
 		
 		case send_JJ://0x02
@@ -207,6 +211,10 @@ int SM2_Tick(int state)
 	//========ACTIONS===========
 	switch(state){
 		case init2:
+				count = 0x00;
+				gyro_accel_x = 0;
+				gyro_accel_y = 0;
+				gyro_accel_z = 0;
 		break;
 		
 		case wait2://wait to receive signal from Central hub that workout is about to begin
@@ -222,64 +230,77 @@ int SM2_Tick(int state)
 		
 		case send_SB:
 
-		 		if(USART_HasReceived(1))
-		 		{
-		 			ON = USART_Receive(1);
-		 			PORTA = ON;
-		 			USART_Flush(1);
-		 		}
-		
+// 		if(USART_HasReceived(1))
+// 		{
+// 			ON = USART_Receive(1);
+// 			PORTA = ON;
+// 			USART_Flush(1);
+// 		}
+// 		count++;
 		if(ON > 0x00)
-		{		
-		if(Ya >= 1.1)
 		{
-			unsigned char sending = 0x01;
-			USART_Flush(1);
-			if(USART_IsSendReady(1))
-			USART_Send(sending,1);//send a bit to progress state of exercise
-			while(!USART_HasTransmitted(1))
+			if( (Ya >= 1.4) && (gyro_accel_y < 1.4))
 			{
-				//wait until transmittedP
-				// 					PORTA = 0x00;
+				gyro_accel_y = Ya;
+				unsigned char sending = 0x01;
+				USART_Flush(1);
+				if(USART_IsSendReady(1))
+				USART_Send(sending,1);//send a bit to progress state of exercise
+				while(!USART_HasTransmitted(1))
+				{
+					//wait until transmittedP
+					PORTA = 0x00;
+				}
+				PORTA = 0x01;
 			}
-			USART_Flush(1);
-			count++;
-			PORTA = 0x01;
-		}
+			else if((Ya < 1.4) && (gyro_accel_y >= 1.4))
+			{
+				gyro_accel_y = Ya;
+				unsigned char sending = 0x01;
+				USART_Flush(1);
+				if(USART_IsSendReady(1))
+				USART_Send(sending,1);//send a bit to progress state of exercise
+				while(!USART_HasTransmitted(1))
+				{
+					//wait until transmittedP
+					PORTA = 0x00;
+				}
+				PORTA = 0x01;
+			}
 		}
 		// 		else if (count >=20)
 		// 		{
 		// 			if(Ya >= 2)
 		// 			{
 		// 				unsigned char sending = 0x01;
-		// 				USART_Flush(1);
-		// 				if(USART_IsSendReady(1))
-		// 				USART_Send(sending,1);//send a bit to progress state of exercise
-		// 				while(!USART_HasTransmitted(1))
+		// 				USART_Flush(0);
+		// 				if(USART_IsSendReady(0))
+		// 				USART_Send(sending,0);//send a bit to progress state of exercise
+		// 				while(!USART_HasTransmitted(0))
 		// 				{
 		// 					//wait until transmittedP
 		// 					PORTA = 0x00;
 		// 				}
-		// 				count++;
+		//
 		// 				PORTA = 0x01;
 		// 			}
 		// 		}
 		// 		else if (count >=30)
 		// 		{
-		// 					if(Ya >= 2)
-		// 					{
-		// 						unsigned char sending = 0x01;
-		// 						USART_Flush(1);
-		// 						if(USART_IsSendReady(1))
-		// 						USART_Send(sending,1);//send a bit to progress state of exercise
-		// 						while(!USART_HasTransmitted(1))
-		// 						{
-		// 							//wait until transmittedP
-		// 							PORTA = 0x00;
-		// 						}
-		// 						count++;
-		// 						PORTA = 0x01;
-		// 					}
+		// 			if(Ya >= 1 && Za >= 1)
+		// 			{
+		// 				unsigned char sending = 0x01;
+		// 				USART_Flush(0);
+		// 				if(USART_IsSendReady(0))
+		// 				USART_Send(sending,0);//send a bit to progress state of exercise
+		// 				while(!USART_HasTransmitted(0))
+		// 				{
+		// 					//wait until transmittedP
+		// 					PORTA = 0x00;
+		// 				}
+		//
+		// 				PORTA = 0x01;
+		// 			}
 		// 		}
 
 		// 		else if(Za < 0.5)//resting fist is going to be pointed up so Za won't much applied force
@@ -392,8 +413,8 @@ int main()
 	
 	I2C_Init();											/* Initialize I2C */
 	MPU6050_Init();										/* Initialize MPU6050 */
-	// 	initUSART(0);	//0 for left hand					/* Initialize USART with 9600 baud rate */
-	initUSART(1); //1 for right hand
+	initUSART(1);	//0 for right hand					/* Initialize USART with 9600 baud rate */
+	//initUSART(1); //1 for left hand
 	
 	//declare number of tasks using tasksNum
 	tasksNum = 2; //Task 1 can be reading information from Gyroscope
@@ -483,3 +504,4 @@ int main()
 // 		dtostrf( Zg, 3, 2, float_ );
 // 		sprintf(buffer," Gz = %s%c/s\r\n",float_,0xF8);
 // 		USART_SendString(buffer);
+
