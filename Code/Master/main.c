@@ -48,30 +48,33 @@ int SM1_Tick(int state){
 	static unsigned char age_2=0x00; //second digit of age (10's place)
 	static unsigned char age_3=0x00; //third digit of age (100's place)
 	static unsigned char age_4=0x00;
-	static unsigned char total_age = 0x00; //Numerical age value as a whole
+	static unsigned short total_age = 0x00; //Numerical age value as a whole
 	static enum gen{male,female} gen_var;
-// 	static enum gen gen_var;
+	// 	static enum gen gen_var;
 	static unsigned char feet = 0x00;
 	static unsigned char inches1 = 0x00;
 	static unsigned char inches2 =0x00;
 	static unsigned char inches3 = 0x00;
-	static unsigned char inches_total = 0x00;//Numerical inches total as a whole
+	static unsigned short inches_total = 0x00;//Numerical inches total as a whole
 	static unsigned char bWeight1 = 0x00;//body weight 1st digit
 	static unsigned char bWeight2 = 0x00;//body weight 2nd digit
 	static unsigned char bWeight3 = 0x00;//body weight 3rd digit
 	static unsigned char bWeight4 = 0x00;//extra variable for '#'
-	static unsigned char bWeight_total = 0x00;//Numerical total body weight combining 3 different digits ( bWeight1, bWeight2, bWeight3)
+	static unsigned short bWeight_total = 0x00;//Numerical total body weight combining 3 different digits ( bWeight1, bWeight2, bWeight3)
 	static unsigned char db_weight1 = 0x00;//first digit of weight in pounds
 	static unsigned char db_weight2 = 0x00;//second digit of weight in pounds
 	static unsigned char db_weight3 = 0x00;//extra variable for '#' button
-	static unsigned char db_weight_total = 0x00;//Numerical total value of dumb-bell weights
-	static short rightweight=0;
-	static unsigned short x;
-	static unsigned char my_char;
+	static unsigned short db_weight_total = 0x00;//Numerical total value of dumb-bell weights
+	static float rightweight=0;//right weight is combination of bodyweight and dumbbell weight
+	static unsigned short x = 0;
+	static unsigned char my_char = 0x00;
 	static unsigned char receive1 = 0x00;
 	static unsigned char receive2 = 0x00;
-	static unsigned char receive3 = 0x00;
-	static unsigned char receive4 = 0x00;
+	// 	static unsigned char receive3 = 0x00;
+	// 	static unsigned char receive4 = 0x00;
+	
+	static float cals_burned;
+	static unsigned char float_[10];
 
 	
 	//TRANSITIONS
@@ -373,22 +376,22 @@ int SM1_Tick(int state){
 		
 
 		case ex_setup:
-// 		if(kpVal=='1')//boxing
-// 		{
-// 			state=boxingL;
-// 		}
-// 		else if(kpVal=='2')//Situp
-// 		{
-// 			state=su_UP;
-// 		}
-// 		else if(kpVal=='3')//jumping jacks
-// 		{
-// 			state=JJ_expand;
-// 		}
-// 		else if(kpVal=='4')//pushup
-// 		{
-// 			state = pushups_UP;
-// 		}
+		// 		if(kpVal=='1')//boxing
+		// 		{
+		// 			state=boxingL;
+		// 		}
+		// 		else if(kpVal=='2')//Situp
+		// 		{
+		// 			state=su_UP;
+		// 		}
+		// 		else if(kpVal=='3')//jumping jacks
+		// 		{
+		// 			state=JJ_expand;
+		// 		}
+		// 		else if(kpVal=='4')//pushup
+		// 		{
+		// 			state = pushups_UP;
+		// 		}
 		state = ex_setup_isready;
 		break;
 		
@@ -405,30 +408,30 @@ int SM1_Tick(int state){
 		}
 		else if(kpVal=='2')//Situp
 		{
-				state_delay++;
-				if(state_delay >= 50)
-				{
-						state=su_UP;
-					state_delay = 0;
-				}
+			state_delay++;
+			if(state_delay >= 50)
+			{
+				state=su_UP;
+				state_delay = 0;
+			}
 		}
 		else if(kpVal=='3')//jumping jacks
 		{
-				state_delay++;
-				if(state_delay >= 50)
-				{
-					state=JJ_expand;
-					state_delay = 0;
-				}
+			state_delay++;
+			if(state_delay >= 50)
+			{
+				state=JJ_expand;
+				state_delay = 0;
+			}
 		}
 		else if(kpVal=='4')//pushup
 		{
-				state_delay++;
-				if(state_delay >= 50)
-				{
-					state = pushups_UP;
-					state_delay = 0;
-				}
+			state_delay++;
+			if(state_delay >= 50)
+			{
+				state = pushups_UP;
+				state_delay = 0;
+			}
 		}
 		break;
 		
@@ -436,7 +439,7 @@ int SM1_Tick(int state){
 
 		if(receive1 == 0x01)
 		{
-// 			state_delay++;
+			// 			state_delay++;
 			receive1 = 0x00;
 			state = boxingR;
 		}
@@ -462,7 +465,7 @@ int SM1_Tick(int state){
 		
 		case boxingHL:
 		if(receive1 == 0x01)
-		{		
+		{
 			receive1 = 0x00;
 			state = boxingHR;
 		}
@@ -506,6 +509,126 @@ int SM1_Tick(int state){
 		}
 		break;
 		
+		case su_UP:
+		if(receive1 == 0x01)
+		{
+// 			receive1 = 0x00;
+			state=su_DOWN;
+		}
+		
+		break;
+		
+		case su_DOWN:
+		if(receive1 == 0x00)
+		{
+			state_delay++;
+// 			receive2 = 0x00;
+			state=su_UP;
+			if(state_delay>=3)
+			{
+				state=finish1;
+				state_delay=0;
+			}
+		}
+		break;
+		
+		case su_L_UP:
+		if(receive1 == 0x01)
+		{
+			receive1 = 0x00;
+			state=su_L_DOWN;
+		}
+		break;
+		
+		case su_L_DOWN:
+		if(receive2 == 0x01)
+		{
+			state_delay++;
+			receive2 = 0x00;
+			state=su_L_UP;
+			if(state_delay>=3)
+			{
+				state=finish1;
+				state_delay=0;
+			}
+		}
+		break;
+		
+		case su_R_UP:
+		if(receive1 == 0x01)
+		{
+			receive1 = 0x00;
+			state=su_R_DOWN;
+		}
+		break;
+		
+		case su_R_DOWN:
+		if(receive2 == 0x01)
+		{
+			state_delay++;
+			receive2 = 0x00;
+			state=su_R_UP;
+			if(state_delay>=3)
+			{
+				state=finish1;
+				state_delay=0;
+			}
+		}
+		break;
+		
+		case JJ_expand:
+		if(receive1 == 0x01)
+		{
+// 			receive1 = 0x00;
+			state=JJ_close;
+		}
+		break;
+		
+		case JJ_close:
+		if(receive1 == 0x00)
+		{
+			state_delay++;
+// 			receive2 = 0x00;
+			state=JJ_expand;
+			if(state_delay>=3)
+			{
+				state=finish1;
+				state_delay=0;
+			}
+		}
+		break;
+		
+		case pushups_UP:
+		if(receive1 == 0x01)
+		{
+			state_delay++;
+			receive1 = 0x00;
+			if(state_delay >=10)
+			{
+				state = pushups_DOWN;
+// 				state_delay=0;
+			}
+		}
+		
+		break;
+		
+		case pushups_DOWN:
+		if(receive1 == 0x01)
+		{
+			state_delay++;
+			receive1 = 0x00;
+			if(state_delay >=10)
+			{
+				state = pushups_UP;
+// 				state_delay=0;
+			}
+			if(state_delay >= 120)
+			{
+				state = finish1;
+			}
+		}
+		break;
+		
 		case finish1:
 		state_delay++;
 		if(state_delay>=10)
@@ -519,14 +642,14 @@ int SM1_Tick(int state){
 		state=finish2;
 		break;
 		
-// 		case weight:
-// 		if(rightweight==10)
-// 		{
-// 			state=boxingL;
-// 		}
-// 		else
-// 		state=weight;
-// 		break;
+		// 		case weight:
+		// 		if(rightweight==10)
+		// 		{
+		// 			state=boxingL;
+		// 		}
+		// 		else
+		// 		state=weight;
+		// 		break;
 		
 		default:
 		state=Init;
@@ -541,7 +664,38 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0, 0);
 		nokia_lcd_write_string("WELCOME",2);
 		nokia_lcd_render();
-
+		// 	state_delay = 0;//timing count for delay
+		// 	 kpVal=0x00;//Keypad value
+		// 	age_1=0x00; //first digit of age (1's place)
+		// 	 age_2=0x00; //second digit of age (10's place)
+		// 	 age_3=0x00; //third digit of age (100's place)
+		// 	 age_4=0x00;
+		// 	 total_age = 0x00; //Numerical age value as a whole
+		// // 	static enum gen{male,female} gen_var;
+		// 	 	gen_var = 0x00;
+		// 	 feet = 0x00;
+		// 	 inches1 = 0x00;
+		// 	 inches2 =0x00;
+		// 	 inches3 = 0x00;
+		// 	 inches_total = 0x00;//Numerical inches total as a whole
+		// 	 bWeight1 = 0x00;//body weight 1st digit
+		// 	 bWeight2 = 0x00;//body weight 2nd digit
+		// 	 bWeight3 = 0x00;//body weight 3rd digit
+		// 	 bWeight4 = 0x00;//extra variable for '#'
+		// 	 bWeight_total = 0x00;//Numerical total body weight combining 3 different digits ( bWeight1, bWeight2, bWeight3)
+		// 	db_weight1 = 0x00;//first digit of weight in pounds
+		// 	 db_weight2 = 0x00;//second digit of weight in pounds
+		// 	db_weight3 = 0x00;//extra variable for '#' button
+		// 	db_weight_total = 0x00;//Numerical total value of dumb-bell weights
+		// 	 rightweight=0;
+		// // 	static unsigned short x;
+		// 	//my_char;
+		// 	receive1 = 0x00;
+		// 	receive2 = 0x00;
+		// // 	receive3 = 0x00;
+		// // 	receive4 = 0x00;
+		//
+		// 	 cals_burned = 0;
 		break;
 		case age1:
 		nokia_lcd_clear();
@@ -993,18 +1147,18 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("JAB",2);
 		nokia_lcd_render();
-// 		USART_Flush(0);
-// 		if(USART_IsSendReady(0))
-// 		USART_Send(kpVal,0);
-// 		while(!USART_HasTransmitted(0)){
-// 			//wait until transmitted
-// 		}
-// 		USART_Flush(1);
-// 		if(USART_IsSendReady(1))
-// 		USART_Send(0x00,1);
-// 		while(!USART_HasTransmitted(1)){
-// 			//wait until transmitted
-// 		}
+		// 		USART_Flush(0);
+		// 		if(USART_IsSendReady(0))
+		// 		USART_Send(kpVal,0);
+		// 		while(!USART_HasTransmitted(0)){
+		// 			//wait until transmitted
+		// 		}
+		// 		USART_Flush(1);
+		// 		if(USART_IsSendReady(1))
+		// 		USART_Send(0x00,1);
+		// 		while(!USART_HasTransmitted(1)){
+		// 			//wait until transmitted
+		// 		}
 		if(USART_HasReceived(0))
 		{
 			PORTA = 0x03;
@@ -1021,18 +1175,18 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("JAB",2);
 		nokia_lcd_render();
-// 		USART_Flush(0);
-// 		if(USART_IsSendReady(0))
-// 		USART_Send(0x00,0);
-// 		while(!USART_HasTransmitted(0)){
-// 			//wait until transmitted
-// 		}
-// 		USART_Flush(1);
-// 		if(USART_IsSendReady(1))
-// 		USART_Send(kpVal,1);
-// 		while(!USART_HasTransmitted(1)){
-// 			//wait until transmitted
-// 		}
+		// 		USART_Flush(0);
+		// 		if(USART_IsSendReady(0))
+		// 		USART_Send(0x00,0);
+		// 		while(!USART_HasTransmitted(0)){
+		// 			//wait until transmitted
+		// 		}
+		// 		USART_Flush(1);
+		// 		if(USART_IsSendReady(1))
+		// 		USART_Send(kpVal,1);
+		// 		while(!USART_HasTransmitted(1)){
+		// 			//wait until transmitted
+		// 		}
 
 		if(USART_HasReceived(1))
 		{
@@ -1097,6 +1251,178 @@ int SM1_Tick(int state){
 		}
 		break;
 		
+		case su_UP:
+		nokia_lcd_clear();
+		nokia_lcd_set_cursor(0, 0);
+		nokia_lcd_write_string("SIT", 2);
+		nokia_lcd_set_cursor(0,30);
+		nokia_lcd_write_string("UP",2);
+		nokia_lcd_render();
+		// 		USART_Flush(0);
+		// 		if(USART_IsSendReady(0))
+		// 		USART_Send(kpVal,0);
+		// 		while(!USART_HasTransmitted(0)){
+		// 			//wait until transmitted
+		// 		}
+		// 		USART_Flush(1);
+		// 		if(USART_IsSendReady(1))
+		// 		USART_Send(0x00,1);
+		// 		while(!USART_HasTransmitted(1)){
+		// 			//wait until transmitted
+		// 		}
+		if(USART_HasReceived(0))
+		{
+			PORTA = 0x03;
+			receive1 = USART_Receive(0);
+			USART_Flush(0);
+		}
+		PORTA = 0x01;
+		break;
+		
+		case su_DOWN:
+				nokia_lcd_clear();
+				nokia_lcd_set_cursor(0, 0);
+				nokia_lcd_write_string("SIT", 2);
+				nokia_lcd_set_cursor(0,30);
+				nokia_lcd_write_string("DOWN",2);
+				nokia_lcd_render();
+				// 		USART_Flush(0);
+				// 		if(USART_IsSendReady(0))
+				// 		USART_Send(kpVal,0);
+				// 		while(!USART_HasTransmitted(0)){
+				// 			//wait until transmitted
+				// 		}
+				// 		USART_Flush(1);
+				// 		if(USART_IsSendReady(1))
+				// 		USART_Send(0x00,1);
+				// 		while(!USART_HasTransmitted(1)){
+				// 			//wait until transmitted
+				// 		}
+				if(USART_HasReceived(0))
+				{
+					PORTA = 0x03;
+					receive1 = USART_Receive(0);
+					USART_Flush(0);
+				}
+				PORTA = 0x01;
+		break;
+		
+		case su_L_UP:
+		break;
+		
+		case su_L_DOWN:
+		break;
+		
+		case su_R_UP:
+		break;
+		
+		case su_R_DOWN:
+		break;
+		
+		case JJ_expand:
+				nokia_lcd_clear();
+				nokia_lcd_set_cursor(0, 0);
+				nokia_lcd_write_string("EXPAND", 2);
+				nokia_lcd_render();
+				// 		USART_Flush(0);
+				// 		if(USART_IsSendReady(0))
+				// 		USART_Send(kpVal,0);
+				// 		while(!USART_HasTransmitted(0)){
+				// 			//wait until transmitted
+				// 		}
+				// 		USART_Flush(1);
+				// 		if(USART_IsSendReady(1))
+				// 		USART_Send(0x00,1);
+				// 		while(!USART_HasTransmitted(1)){
+				// 			//wait until transmitted
+				// 		}
+				if(USART_HasReceived(0))
+				{
+					PORTA = 0x03;
+					receive1 = USART_Receive(0);
+					USART_Flush(0);
+				}
+				PORTA = 0x01;
+		break;
+		
+		case JJ_close:
+						nokia_lcd_clear();
+						nokia_lcd_set_cursor(0, 0);
+						nokia_lcd_write_string("CLOSE", 2);
+						nokia_lcd_render();
+						// 		USART_Flush(0);
+						// 		if(USART_IsSendReady(0))
+						// 		USART_Send(kpVal,0);
+						// 		while(!USART_HasTransmitted(0)){
+						// 			//wait until transmitted
+						// 		}
+						// 		USART_Flush(1);
+						// 		if(USART_IsSendReady(1))
+						// 		USART_Send(0x00,1);
+						// 		while(!USART_HasTransmitted(1)){
+						// 			//wait until transmitted
+						// 		}
+						if(USART_HasReceived(0))
+						{
+							PORTA = 0x03;
+							receive1 = USART_Receive(0);
+							USART_Flush(0);
+						}
+						PORTA = 0x01;
+		break;
+		
+		case pushups_UP:
+						nokia_lcd_clear();
+						nokia_lcd_set_cursor(0, 0);
+						nokia_lcd_write_string("UP", 3);
+						nokia_lcd_render();
+						// 		USART_Flush(0);
+						// 		if(USART_IsSendReady(0))
+						// 		USART_Send(kpVal,0);
+						// 		while(!USART_HasTransmitted(0)){
+						// 			//wait until transmitted
+						// 		}
+						// 		USART_Flush(1);
+						// 		if(USART_IsSendReady(1))
+						// 		USART_Send(0x00,1);
+						// 		while(!USART_HasTransmitted(1)){
+						// 			//wait until transmitted
+						// 		}
+						if(USART_HasReceived(0))
+						{
+							PORTA = 0x03;
+							receive1 = USART_Receive(0);
+							USART_Flush(0);
+						}
+						PORTA = 0x01;
+		break;
+		
+		case pushups_DOWN:
+						nokia_lcd_clear();
+						nokia_lcd_set_cursor(0, 0);
+						nokia_lcd_write_string("DOWN", 2);
+						nokia_lcd_render();
+						// 		USART_Flush(0);
+						// 		if(USART_IsSendReady(0))
+						// 		USART_Send(kpVal,0);
+						// 		while(!USART_HasTransmitted(0)){
+						// 			//wait until transmitted
+						// 		}
+						// 		USART_Flush(1);
+						// 		if(USART_IsSendReady(1))
+						// 		USART_Send(0x00,1);
+						// 		while(!USART_HasTransmitted(1)){
+						// 			//wait until transmitted
+						// 		}
+						if(USART_HasReceived(0))
+						{
+							PORTA = 0x03;
+							receive1 = USART_Receive(0);
+							USART_Flush(0);
+						}
+						PORTA = 0x01;
+		break;
+		
 		case finish1:
 		nokia_lcd_clear();
 		nokia_lcd_set_cursor(0, 0);
@@ -1104,24 +1430,29 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,25);
 		nokia_lcd_write_string("WORKOUT",2);
 		nokia_lcd_render();
+		rightweight = db_weight_total + bWeight_total;
+		rightweight = rightweight/2.2;
+		cals_burned = 0.08 * rightweight * 5;
+		
 		break;
 		
 		case finish2:
+		dtostrf( cals_burned, 3, 2, float_ );
 		nokia_lcd_clear();
 		nokia_lcd_set_cursor(0, 0);
 		nokia_lcd_write_string("BURNED CALORIES:", 1);
 		nokia_lcd_set_cursor(0,15);
-		nokia_lcd_write_string("15",3);
+		nokia_lcd_write_string(float_,2);
 		nokia_lcd_render();
 		break;
 		
-// 		case weight:
-// 		
-// 		// 				x = ADC;
-// 		// 				my_char = (char)x;
-// 		// 				PORTD = my_char;
-// 		// //				my_char=(char)(x>>8);
-// 		break;
+		// 		case weight:
+		//
+		// 		// 				x = ADC;
+		// 		// 				my_char = (char)x;
+		// 		// 				PORTD = my_char;
+		// 		// //				my_char=(char)(x>>8);
+		// 		break;
 		
 		default:
 		state=Init;
@@ -1147,8 +1478,8 @@ int main(void)
 	PORTC = 0xF0;//initialize port
 	DDRB = 0xFF;//Nokia5110
 	PORTB = 0x00;
- 	DDRA = 0xFF;//output showing that the bluetooth and hand devices should be on
- 	PORTA=0x00;
+	DDRA = 0xFF;//output showing that the bluetooth and hand devices should be on
+	PORTA=0x00;
 	//ADC_init();
 	initUSART(0);//0 is for left hand
 	initUSART(1);//1 is for right hand
