@@ -228,10 +228,8 @@ int SM2_Tick(int state)
 // 			PORTA = ON;
 // 			USART_Flush(0);
 // 		}
-		count++;
-		if(count>=10)
-		{
-			if(Ya >= 1 && Za >= 1)
+
+			if(Ya >= 1.5)
 			{
 				unsigned char sending = 0x01;
 				USART_Flush(1);
@@ -240,46 +238,47 @@ int SM2_Tick(int state)
 				while(!USART_HasTransmitted(1))
 				{
 					//wait until transmittedP
-					PORTA = 0x00;
+// 					PORTA = 0x00;
 				}
-				
+				USART_Flush(1);
+				count++;
 				PORTA = 0x01;
 			}
-		}
-		else if (count >=20)
-		{
-			if(Ya >= 2)
-			{
-				unsigned char sending = 0x01;
-				USART_Flush(1);
-				if(USART_IsSendReady(1))
-				USART_Send(sending,1);//send a bit to progress state of exercise
-				while(!USART_HasTransmitted(1))
-				{
-					//wait until transmittedP
-					PORTA = 0x00;
-				}
-				
-				PORTA = 0x01;
-			}		
-		}
-		else if (count >=30)
-		{
-					if(Ya >= 1 && Za >= 1)
-					{
-						unsigned char sending = 0x01;
-						USART_Flush(1);
-						if(USART_IsSendReady(1))
-						USART_Send(sending,1);//send a bit to progress state of exercise
-						while(!USART_HasTransmitted(1))
-						{
-							//wait until transmittedP
-							PORTA = 0x00;
-						}
-						
-						PORTA = 0x01;
-					}
-		}
+		
+// 		else if (count >=20)
+// 		{
+// 			if(Ya >= 2)
+// 			{
+// 				unsigned char sending = 0x01;
+// 				USART_Flush(1);
+// 				if(USART_IsSendReady(1))
+// 				USART_Send(sending,1);//send a bit to progress state of exercise
+// 				while(!USART_HasTransmitted(1))
+// 				{
+// 					//wait until transmittedP
+// 					PORTA = 0x00;
+// 				}
+// 				count++;
+// 				PORTA = 0x01;
+// 			}		
+// 		}
+// 		else if (count >=30)
+// 		{
+// 					if(Ya >= 2)
+// 					{
+// 						unsigned char sending = 0x01;
+// 						USART_Flush(1);
+// 						if(USART_IsSendReady(1))
+// 						USART_Send(sending,1);//send a bit to progress state of exercise
+// 						while(!USART_HasTransmitted(1))
+// 						{
+// 							//wait until transmittedP
+// 							PORTA = 0x00;
+// 						}
+// 						count++;
+// 						PORTA = 0x01;
+// 					}
+// 		}
 
 // 		else if(Za < 0.5)//resting fist is going to be pointed up so Za won't much applied force
 // 		{
