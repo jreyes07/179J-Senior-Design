@@ -210,7 +210,7 @@ int SM2_Tick(int state)
 	//========ACTIONS===========
 	switch(state){
 		case init2:
-		count = 0x00;
+		count = 0;
 		gyro_accel_x = 0;
 		gyro_accel_y = 0;
 		gyro_accel_z = 0;
@@ -220,7 +220,7 @@ int SM2_Tick(int state)
 		if(USART_HasReceived(0))
 		{
 			ON = USART_Receive(0);
-			PORTA = ON;
+			PORTA = 0x01;
 			choice = ON;
 			USART_Flush(0);
 		}
@@ -281,7 +281,7 @@ int SM2_Tick(int state)
 		// 			USART_Flush(0);
 		// 		}
 			count++;
-			if( (Ya > 0) && (gyro_accel_y >= 0) && (count >= 20))
+			if( (Ya > 0) && (gyro_accel_y <= 0) && (count >= 20))
 			{
 				count = 0;
 				unsigned char sending = 0x01;
@@ -320,16 +320,19 @@ int SM2_Tick(int state)
 		// 			PORTA = ON;
 		// 			USART_Flush(0);
 		// 		}
-		
-		if(Za >= 0.5)//send data once user is in push-up position
+		count++;
+		if((Za >= 0.5) && (count >= 20))//send data once user is in push-up position
 		{
+			count = 0;
 			USART_Flush(0);
 			if(USART_IsSendReady(0))
 			USART_Send(0x01,0);//send a bit to progress state of exercise
 			while(!USART_HasTransmitted(0))
 			{
 				//wait until transmitted
+				PORTA = 0x00;
 			}
+			PORTA = 0x01;
 		}
 		break;
 		
@@ -342,7 +345,7 @@ int SM2_Tick(int state)
 		// 		}
 		count++;
 		
-		if((Za < 0) &&  (count >= 20))//send data once user is in sit-up position
+		if((Xa > 0.5)  &&  (count >= 20))//send data once user is in sit-up position
 		{
 			count = 0;
 			USART_Flush(0);
@@ -351,10 +354,12 @@ int SM2_Tick(int state)
 			while(!USART_HasTransmitted(0))
 			{
 				//wait until transmitted
+				PORTA = 0x00;
 			}
+			PORTA = 0x01;
 			gyro_accel_z = Za;
 		}
-		else if((Xa > 0.5) && (count >= 20))
+		else if((Za < 0) && (count >= 20))
 		{
 			count = 0;
 			USART_Flush(0);
@@ -363,7 +368,9 @@ int SM2_Tick(int state)
 			while(!USART_HasTransmitted(0))
 			{
 				//wait until transmitted
+				PORTA = 0x00;
 			}
+			PORTA = 0x01;
 			gyro_accel_x = Xa;
 		}
 		break;
@@ -386,8 +393,8 @@ int main()
 	
 	I2C_Init();											/* Initialize I2C */
 	MPU6050_Init();										/* Initialize MPU6050 */
-	initUSART(0);	//0 for right hand					/* Initialize USART with 9600 baud rate */
-	//initUSART(1); //1 for left hand
+	initUSART(0);	//0 for left hand					/* Initialize USART with 9600 baud rate */
+	//initUSART(1); //1 for right hand
 	
 	//declare number of tasks using tasksNum
 	tasksNum = 2; //Task 1 can be reading information from Gyroscope
