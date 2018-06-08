@@ -439,7 +439,7 @@ int SM1_Tick(int state){
 
 		if(receive1 == 0x01)
 		{
-			// 			state_delay++;
+//  			state_delay++;
 			receive1 = 0x00;
 			state = boxingR;
 		}
@@ -453,10 +453,10 @@ int SM1_Tick(int state){
 			receive2 = 0x00;
 			state = boxingL;
 			
-			if(state_delay>=3)
+			if(state_delay%3 == 0)
 			{
 				state=boxingHL;
-				state_delay=0;
+// 				state_delay=0;
 			}
 		}
 
@@ -478,10 +478,10 @@ int SM1_Tick(int state){
 			receive2 = 0x00;
 			state = boxingHL;
 			
-			if(state_delay>=3)
+			if(state_delay%3 == 0)
 			{
 				state=boxingUL;
-				state_delay=0;
+// 				state_delay=0;
 			}
 		}
 		break;
@@ -501,9 +501,12 @@ int SM1_Tick(int state){
 			state_delay++;
 			receive2 = 0x00;
 			state=boxingUL;
-			if(state_delay>=3)
+			if(state_delay%3 == 0)
 			{
-				state=finish1;
+				state = finish1;
+				rightweight = db_weight_total + bWeight_total;
+				rightweight = rightweight/2.2;
+				cals_burned = 0.08 * rightweight * (state_delay*2)/60;
 				state_delay=0;
 			}
 		}
@@ -524,9 +527,12 @@ int SM1_Tick(int state){
 			state_delay++;
 // 			receive2 = 0x00;
 			state=su_UP;
-			if(state_delay>=3)
+			if(state_delay%9 == 0)
 			{
-				state=finish1;
+				state = finish1;
+				rightweight = db_weight_total + bWeight_total;
+				rightweight = rightweight/2.2;
+				cals_burned = 0.08 * rightweight * (state_delay*2)/60;
 				state_delay=0;
 			}
 		}
@@ -548,7 +554,10 @@ int SM1_Tick(int state){
 			state=su_L_UP;
 			if(state_delay>=3)
 			{
-				state=finish1;
+				state = finish1;
+				rightweight = db_weight_total + bWeight_total;
+				rightweight = rightweight/2.2;
+				cals_burned = 0.08 * rightweight * (state_delay*2);
 				state_delay=0;
 			}
 		}
@@ -570,7 +579,10 @@ int SM1_Tick(int state){
 			state=su_R_UP;
 			if(state_delay>=3)
 			{
-				state=finish1;
+				state = finish1;
+				rightweight = db_weight_total + bWeight_total;
+				rightweight = rightweight/2.2;
+				cals_burned = 0.08 * rightweight * (state_delay*2)/60;
 				state_delay=0;
 			}
 		}
@@ -590,9 +602,12 @@ int SM1_Tick(int state){
 			state_delay++;
 // 			receive2 = 0x00;
 			state=JJ_expand;
-			if(state_delay>=3)
+			if(state_delay%9 ==0)
 			{
-				state=finish1;
+				state = finish1;
+				rightweight = db_weight_total + bWeight_total;
+				rightweight = rightweight/2.2;
+				cals_burned = 0.08 * rightweight * (state_delay*2)/60;
 				state_delay=0;
 			}
 		}
@@ -601,13 +616,14 @@ int SM1_Tick(int state){
 		case pushups_UP:
 		if(receive1 == 0x01)
 		{
-			state_delay++;
+// 			state_delay++;
 			receive1 = 0x00;
-			if(state_delay >=10)
-			{
-				state = pushups_DOWN;
-// 				state_delay=0;
-			}
+			state = pushups_DOWN;
+// 			if(state_delay%8)
+// 			{
+// 				state = pushups_DOWN;
+// // 				
+// 			}
 		}
 		
 		break;
@@ -617,19 +633,23 @@ int SM1_Tick(int state){
 		{
 			state_delay++;
 			receive1 = 0x00;
-			if(state_delay >=10)
-			{
-				state = pushups_UP;
-// 				state_delay=0;
-			}
-			if(state_delay >= 120)
+			state = pushups_UP;
+			
+			if(state_delay%8 == 0)
 			{
 				state = finish1;
+						rightweight = db_weight_total + bWeight_total;
+						rightweight = rightweight/2.2;
+						cals_burned = 0.08 * rightweight * (state_delay*2)/60;
+				state_delay=0;
 			}
+
 		}
 		break;
 		
 		case finish1:
+
+		
 		state_delay++;
 		if(state_delay>=10)
 		{
@@ -1109,7 +1129,7 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("3.Jumpin jacks",1);
 		nokia_lcd_set_cursor(0,40);
-		nokia_lcd_write_string("4.Run in place",1);
+		nokia_lcd_write_string("4.Push-Ups",1);
 		nokia_lcd_render();
 		kpVal= GetKeypadKey();
 		break;
@@ -1270,11 +1290,11 @@ int SM1_Tick(int state){
 		// 		while(!USART_HasTransmitted(1)){
 		// 			//wait until transmitted
 		// 		}
-		if(USART_HasReceived(0))
+		if(USART_HasReceived(1))
 		{
 			PORTA = 0x03;
-			receive1 = USART_Receive(0);
-			USART_Flush(0);
+			receive1 = USART_Receive(1);
+			USART_Flush(1);
 		}
 		PORTA = 0x01;
 		break;
@@ -1298,11 +1318,11 @@ int SM1_Tick(int state){
 				// 		while(!USART_HasTransmitted(1)){
 				// 			//wait until transmitted
 				// 		}
-				if(USART_HasReceived(0))
+				if(USART_HasReceived(1))
 				{
 					PORTA = 0x03;
-					receive1 = USART_Receive(0);
-					USART_Flush(0);
+					receive1 = USART_Receive(1);
+					USART_Flush(1);
 				}
 				PORTA = 0x01;
 		break;
@@ -1336,11 +1356,11 @@ int SM1_Tick(int state){
 				// 		while(!USART_HasTransmitted(1)){
 				// 			//wait until transmitted
 				// 		}
-				if(USART_HasReceived(0))
+				if(USART_HasReceived(1))
 				{
 					PORTA = 0x03;
-					receive1 = USART_Receive(0);
-					USART_Flush(0);
+					receive1 = USART_Receive(1);
+					USART_Flush(1);
 				}
 				PORTA = 0x01;
 		break;
@@ -1362,11 +1382,11 @@ int SM1_Tick(int state){
 						// 		while(!USART_HasTransmitted(1)){
 						// 			//wait until transmitted
 						// 		}
-						if(USART_HasReceived(0))
+						if(USART_HasReceived(1))
 						{
 							PORTA = 0x03;
-							receive1 = USART_Receive(0);
-							USART_Flush(0);
+							receive1 = USART_Receive(1);
+							USART_Flush(1);
 						}
 						PORTA = 0x01;
 		break;
@@ -1388,11 +1408,11 @@ int SM1_Tick(int state){
 						// 		while(!USART_HasTransmitted(1)){
 						// 			//wait until transmitted
 						// 		}
-						if(USART_HasReceived(0))
+						if(USART_HasReceived(1))
 						{
 							PORTA = 0x03;
-							receive1 = USART_Receive(0);
-							USART_Flush(0);
+							receive1 = USART_Receive(1);
+							USART_Flush(1);
 						}
 						PORTA = 0x01;
 		break;
@@ -1414,11 +1434,11 @@ int SM1_Tick(int state){
 						// 		while(!USART_HasTransmitted(1)){
 						// 			//wait until transmitted
 						// 		}
-						if(USART_HasReceived(0))
+						if(USART_HasReceived(1))
 						{
 							PORTA = 0x03;
-							receive1 = USART_Receive(0);
-							USART_Flush(0);
+							receive1 = USART_Receive(1);
+							USART_Flush(1);
 						}
 						PORTA = 0x01;
 		break;
@@ -1430,9 +1450,7 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,25);
 		nokia_lcd_write_string("WORKOUT",2);
 		nokia_lcd_render();
-		rightweight = db_weight_total + bWeight_total;
-		rightweight = rightweight/2.2;
-		cals_burned = 0.08 * rightweight * 5;
+
 		
 		break;
 		
