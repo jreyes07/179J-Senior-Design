@@ -393,8 +393,8 @@ int main()
 	
 	I2C_Init();											/* Initialize I2C */
 	MPU6050_Init();										/* Initialize MPU6050 */
-	initUSART(1);	//0 for right hand					/* Initialize USART with 9600 baud rate */
-	//initUSART(1); //1 for left hand
+	initUSART(1);	//0 for left hand					/* Initialize USART with 9600 baud rate */
+	//initUSART(1); //1 for right hand
 	
 	//declare number of tasks using tasksNum
 	tasksNum = 2; //Task 1 can be reading information from Gyroscope
@@ -439,7 +439,7 @@ int main()
 // 		Yg = Gyro_y/16.4;
 // 		Zg = Gyro_z/16.4;
 
-// 		t = (Temperature/340.00)+36.53;					/* Convert temperature in °/c using formula */
+// 		t = (Temperature/340.00)+36.53;					/* Convert temperature in Â°/c using formula */
 //
 //
 //
@@ -470,7 +470,7 @@ int main()
 // 		nokia_lcd_render();
 //
 // 		dtostrf( t, 3, 2, float_ );
-// 		sprintf(buffer," T = %s%cC\t",float_,0xF8);           /* 0xF8 Ascii value of degree '°' on serial */
+// 		sprintf(buffer," T = %s%cC\t",float_,0xF8);           /* 0xF8 Ascii value of degree 'Â°' on serial */
 // 		USART_SendString(buffer);
 //
 // 		dtostrf( Xg, 3, 2, float_ );
