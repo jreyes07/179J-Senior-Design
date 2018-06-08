@@ -10,6 +10,8 @@
 #define F_CPU 8000000UL  // 1 MHz//should be the frequency the microcontroller runs at
 #include <util/delay.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <inttypes.h>
 #include "nokia5110.h"
 #include "scheduler.h"
 #include "keypad.h"
@@ -17,13 +19,7 @@
 #include "usart_ATmega1284.h"
 
 
-//    nokia_lcd_init();
-//    nokia_lcd_clear();
-//	  nokia_lcd_power();
-//    nokia_lcd_write_string("Bella!",1);
-//    nokia_lcd_set_cursor(0, 10);
-//    nokia_lcd_write_string("De Cavia!", 1);
-//    nokia_lcd_render();
+
 
 
 enum SM1_States{Init,
@@ -75,6 +71,7 @@ int SM1_Tick(int state){
 	
 	static float cals_burned;
 	static unsigned char float_[10];
+	static unsigned char quit = 0x00;//if quit == 'd' then quit and calculate the amount of calories burned
 
 	
 	//TRANSITIONS
@@ -375,27 +372,11 @@ int SM1_Tick(int state){
 		break;
 		
 
-		case ex_setup:
-		// 		if(kpVal=='1')//boxing
-		// 		{
-		// 			state=boxingL;
-		// 		}
-		// 		else if(kpVal=='2')//Situp
-		// 		{
-		// 			state=su_UP;
-		// 		}
-		// 		else if(kpVal=='3')//jumping jacks
-		// 		{
-		// 			state=JJ_expand;
-		// 		}
-		// 		else if(kpVal=='4')//pushup
-		// 		{
-		// 			state = pushups_UP;
-		// 		}
+		case ex_setup://sends the choice of the workout to the gloves //also displays a message to the user informing him to get into position or "Get Ready"
 		state = ex_setup_isready;
 		break;
 		
-		case ex_setup_isready:
+		case ex_setup_isready://doesn't do anything in the action switch statement
 		
 		if(kpVal=='1')//boxing
 		{
@@ -436,10 +417,17 @@ int SM1_Tick(int state){
 		break;
 		
 		case boxingL:
-
-		if(receive1 == 0x01)
+		if(quit == 'D')
 		{
-//  			state_delay++;
+			state = finish1;
+				rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+				rightweight = rightweight/2.2;//turn pounds into kilograms
+				cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+				state_delay=0;
+		}
+		else if(receive1 == 0x01)
+		{
+ 			state_delay++;
 			receive1 = 0x00;
 			state = boxingR;
 		}
@@ -447,38 +435,60 @@ int SM1_Tick(int state){
 		break;
 		
 		case boxingR:
-		if(receive2 == 0x01)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive2 == 0x01)
 		{
 			state_delay++;
 			receive2 = 0x00;
 			state = boxingL;
 			
-			if(state_delay%3 == 0)
+			if(state_delay%10 == 0)
 			{
 				state=boxingHL;
 // 				state_delay=0;
 			}
 		}
-
-
 		break;
 		
 		case boxingHL:
-		if(receive1 == 0x01)
+		if(quit == 'D')
 		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x01)
+		{
+			state_delay++;
 			receive1 = 0x00;
 			state = boxingHR;
 		}
 		break;
 		
 		case boxingHR:
-		if(receive2 == 0x01)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive2 == 0x01)
 		{
 			state_delay++;
 			receive2 = 0x00;
 			state = boxingHL;
-			
-			if(state_delay%3 == 0)
+			if(state_delay%10 == 0)
 			{
 				state=boxingUL;
 // 				state_delay=0;
@@ -487,8 +497,17 @@ int SM1_Tick(int state){
 		break;
 		
 		case boxingUL:
-		if(receive1 == 0x01)
+		if(quit == 'D')
 		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x01)
+		{
+ 			state_delay++;
 			receive1 = 0x00;
 			state=boxingUR;
 		}
@@ -496,127 +515,186 @@ int SM1_Tick(int state){
 		break;
 		
 		case boxingUR:
-		if(receive2 == 0x01)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive2 == 0x01)
 		{
 			state_delay++;
 			receive2 = 0x00;
 			state=boxingUL;
-			if(state_delay%3 == 0)
+			if(state_delay%10 == 0)
 			{
-				state = finish1;
-				rightweight = db_weight_total + bWeight_total;
-				rightweight = rightweight/2.2;
-				cals_burned = 0.08 * rightweight * (state_delay*2)/60;
-				state_delay=0;
+				state = boxingL;
 			}
 		}
 		break;
 		
 		case su_UP:
-		if(receive1 == 0x01)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x01)
 		{
 // 			receive1 = 0x00;
+			state_delay++;
 			state=su_DOWN;
 		}
-		
 		break;
 		
 		case su_DOWN:
-		if(receive1 == 0x00)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x00)
 		{
 			state_delay++;
 // 			receive2 = 0x00;
 			state=su_UP;
-			if(state_delay%9 == 0)
+			if(state_delay%30 == 0)//30 regular situps
 			{
-				state = finish1;
-				rightweight = db_weight_total + bWeight_total;
-				rightweight = rightweight/2.2;
-				cals_burned = 0.08 * rightweight * (state_delay*2)/60;
-				state_delay=0;
+				state = su_L_UP;
 			}
 		}
 		break;
 		
 		case su_L_UP:
-		if(receive1 == 0x01)
+		if(quit == 'D')
 		{
-			receive1 = 0x00;
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x01)
+		{
+// 			receive1 = 0x00;
+			state_delay++;
 			state=su_L_DOWN;
 		}
 		break;
 		
 		case su_L_DOWN:
-		if(receive2 == 0x01)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x00)
 		{
 			state_delay++;
-			receive2 = 0x00;
+// 			receive2 = 0x00;
 			state=su_L_UP;
-			if(state_delay>=3)
+			if(state_delay%30 == 0)
 			{
-				state = finish1;
-				rightweight = db_weight_total + bWeight_total;
-				rightweight = rightweight/2.2;
-				cals_burned = 0.08 * rightweight * (state_delay*2);
-				state_delay=0;
+				state = su_R_UP;
 			}
 		}
 		break;
 		
 		case su_R_UP:
-		if(receive1 == 0x01)
+		if(quit == 'D')
 		{
-			receive1 = 0x00;
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x01)
+		{
+// 			receive1 = 0x00;
+			state_delay++;
 			state=su_R_DOWN;
 		}
 		break;
 		
 		case su_R_DOWN:
-		if(receive2 == 0x01)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x00)
 		{
 			state_delay++;
-			receive2 = 0x00;
+// 			receive2 = 0x00;
 			state=su_R_UP;
-			if(state_delay>=3)
+			if(state_delay%30 == 0)
 			{
-				state = finish1;
-				rightweight = db_weight_total + bWeight_total;
-				rightweight = rightweight/2.2;
-				cals_burned = 0.08 * rightweight * (state_delay*2)/60;
-				state_delay=0;
+				state = su_UP;
 			}
 		}
 		break;
 		
 		case JJ_expand:
-		if(receive1 == 0x01)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x01)
 		{
 // 			receive1 = 0x00;
+			state_delay++;
 			state=JJ_close;
 		}
 		break;
 		
 		case JJ_close:
-		if(receive1 == 0x00)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x00)
 		{
 			state_delay++;
 // 			receive2 = 0x00;
 			state=JJ_expand;
-			if(state_delay%9 ==0)
-			{
-				state = finish1;
-				rightweight = db_weight_total + bWeight_total;
-				rightweight = rightweight/2.2;
-				cals_burned = 0.08 * rightweight * (state_delay*2)/60;
-				state_delay=0;
-			}
 		}
 		break;
 		
 		case pushups_UP:
-		if(receive1 == 0x01)
+		if(quit == 'D')
 		{
-// 			state_delay++;
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x01)
+		{
+			state_delay++;
 			receive1 = 0x00;
 			state = pushups_DOWN;
 // 			if(state_delay%8)
@@ -629,32 +707,27 @@ int SM1_Tick(int state){
 		break;
 		
 		case pushups_DOWN:
-		if(receive1 == 0x01)
+		if(quit == 'D')
+		{
+			state = finish1;
+			rightweight = db_weight_total + bWeight_total;//the total weight you're carrying is your bodyweight + the weight of the dumbells you're using
+			rightweight = rightweight/2.2;//turn pounds into kilograms
+			cals_burned = 0.08 * rightweight * (state_delay)/60;//calories burned = 0.08(cals/min for calisthenics) * (amount of weight you're moving in kg) * (the number of minutes)
+			state_delay=0;
+		}
+		else if(receive1 == 0x01)
 		{
 			state_delay++;
 			receive1 = 0x00;
 			state = pushups_UP;
-			
-			if(state_delay%8 == 0)
-			{
-				state = finish1;
-						rightweight = db_weight_total + bWeight_total;
-						rightweight = rightweight/2.2;
-						cals_burned = 0.08 * rightweight * (state_delay*2)/60;
-				state_delay=0;
-			}
-
 		}
 		break;
 		
 		case finish1:
-
-		
 		state_delay++;
-		if(state_delay>=10)
+		if(state_delay == 50)
 		{
-			state=finish2;
-			state_delay=0;
+			state = finish2;
 		}
 		break;
 		
@@ -1150,35 +1223,27 @@ int SM1_Tick(int state){
 		}
 		nokia_lcd_clear();
 		nokia_lcd_set_cursor(0, 0);
-		nokia_lcd_write_string("Get Ready",2);
+		nokia_lcd_write_string("GET",2);
+		nokia_lcd_set_cursor(0, 20);
+		nokia_lcd_write_string("READY",2);
 		nokia_lcd_render();
 
 		break;
 		
 		case ex_setup_isready://telling the statemachine which state to go to
-
+		PORTA = 0x01;
 		break;
 		
 		case boxingL:
-
 		nokia_lcd_clear();
 		nokia_lcd_set_cursor(0, 0);
 		nokia_lcd_write_string("LEFT", 2);
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("JAB",2);
 		nokia_lcd_render();
-		// 		USART_Flush(0);
-		// 		if(USART_IsSendReady(0))
-		// 		USART_Send(kpVal,0);
-		// 		while(!USART_HasTransmitted(0)){
-		// 			//wait until transmitted
-		// 		}
-		// 		USART_Flush(1);
-		// 		if(USART_IsSendReady(1))
-		// 		USART_Send(0x00,1);
-		// 		while(!USART_HasTransmitted(1)){
-		// 			//wait until transmitted
-		// 		}
+		quit = GetKeypadKey();
+
+
 		if(USART_HasReceived(0))
 		{
 			PORTA = 0x03;
@@ -1195,18 +1260,8 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("JAB",2);
 		nokia_lcd_render();
-		// 		USART_Flush(0);
-		// 		if(USART_IsSendReady(0))
-		// 		USART_Send(0x00,0);
-		// 		while(!USART_HasTransmitted(0)){
-		// 			//wait until transmitted
-		// 		}
-		// 		USART_Flush(1);
-		// 		if(USART_IsSendReady(1))
-		// 		USART_Send(kpVal,1);
-		// 		while(!USART_HasTransmitted(1)){
-		// 			//wait until transmitted
-		// 		}
+		quit = GetKeypadKey();
+
 
 		if(USART_HasReceived(1))
 		{
@@ -1222,6 +1277,9 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("HOOK",2);
 		nokia_lcd_render();
+		quit = GetKeypadKey();
+		
+		
 		if(USART_HasReceived(0))
 		{
 			receive1 = USART_Receive(0);
@@ -1236,6 +1294,9 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("HOOK",2);
 		nokia_lcd_render();
+		quit = GetKeypadKey();
+		
+		
 		if(USART_HasReceived(1))
 		{
 			receive2 = USART_Receive(1);
@@ -1250,6 +1311,9 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("UPPERCUT",2);
 		nokia_lcd_render();
+		quit = GetKeypadKey();
+		
+		
 		if(USART_HasReceived(0))
 		{
 			receive1 = USART_Receive(0);
@@ -1264,6 +1328,9 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("UPPERCUT",2);
 		nokia_lcd_render();
+		quit = GetKeypadKey();
+		
+		
 		if(USART_HasReceived(1))
 		{
 			receive2 = USART_Receive(1);
@@ -1278,18 +1345,9 @@ int SM1_Tick(int state){
 		nokia_lcd_set_cursor(0,30);
 		nokia_lcd_write_string("UP",2);
 		nokia_lcd_render();
-		// 		USART_Flush(0);
-		// 		if(USART_IsSendReady(0))
-		// 		USART_Send(kpVal,0);
-		// 		while(!USART_HasTransmitted(0)){
-		// 			//wait until transmitted
-		// 		}
-		// 		USART_Flush(1);
-		// 		if(USART_IsSendReady(1))
-		// 		USART_Send(0x00,1);
-		// 		while(!USART_HasTransmitted(1)){
-		// 			//wait until transmitted
-		// 		}
+		quit = GetKeypadKey();
+		
+		
 		if(USART_HasReceived(1))
 		{
 			PORTA = 0x03;
@@ -1306,18 +1364,9 @@ int SM1_Tick(int state){
 				nokia_lcd_set_cursor(0,30);
 				nokia_lcd_write_string("DOWN",2);
 				nokia_lcd_render();
-				// 		USART_Flush(0);
-				// 		if(USART_IsSendReady(0))
-				// 		USART_Send(kpVal,0);
-				// 		while(!USART_HasTransmitted(0)){
-				// 			//wait until transmitted
-				// 		}
-				// 		USART_Flush(1);
-				// 		if(USART_IsSendReady(1))
-				// 		USART_Send(0x00,1);
-				// 		while(!USART_HasTransmitted(1)){
-				// 			//wait until transmitted
-				// 		}
+				quit = GetKeypadKey();
+				
+				
 				if(USART_HasReceived(1))
 				{
 					PORTA = 0x03;
@@ -1328,15 +1377,83 @@ int SM1_Tick(int state){
 		break;
 		
 		case su_L_UP:
+		nokia_lcd_clear();
+		nokia_lcd_set_cursor(0, 0);
+		nokia_lcd_write_string("LEFT KNEE", 1);
+		nokia_lcd_set_cursor(0,10);
+		nokia_lcd_write_string("TO",1);
+		nokia_lcd_set_cursor(0,20);
+		nokia_lcd_write_string("RIGHT ELBOW",1);
+		nokia_lcd_render();
+		quit = GetKeypadKey();
+		
+		
+		if(USART_HasReceived(1))
+		{
+			PORTA = 0x03;
+			receive1 = USART_Receive(1);
+			USART_Flush(1);
+		}
+		PORTA = 0x01;
 		break;
 		
 		case su_L_DOWN:
+				nokia_lcd_clear();
+				nokia_lcd_set_cursor(0, 0);
+				nokia_lcd_write_string("SIT", 2);
+				nokia_lcd_set_cursor(0,30);
+				nokia_lcd_write_string("DOWN",2);
+				nokia_lcd_render();
+				quit = GetKeypadKey();
+				
+				
+				if(USART_HasReceived(1))
+				{
+					PORTA = 0x03;
+					receive1 = USART_Receive(1);
+					USART_Flush(1);
+				}
+				PORTA = 0x01;
 		break;
 		
 		case su_R_UP:
+				nokia_lcd_clear();
+				nokia_lcd_set_cursor(0, 0);
+				nokia_lcd_write_string("RIGHT KNEE", 1);
+				nokia_lcd_set_cursor(0,10);
+				nokia_lcd_write_string("TO",1);
+				nokia_lcd_set_cursor(0,20);
+				nokia_lcd_write_string("LEFT ELBOW",1);
+				nokia_lcd_render();
+				quit = GetKeypadKey();
+				
+				
+				if(USART_HasReceived(0))
+				{
+					PORTA = 0x03;
+					receive1 = USART_Receive(0);
+					USART_Flush(0);
+				}
+				PORTA = 0x01;
 		break;
 		
 		case su_R_DOWN:
+				nokia_lcd_clear();
+				nokia_lcd_set_cursor(0, 0);
+				nokia_lcd_write_string("SIT", 2);
+				nokia_lcd_set_cursor(0,30);
+				nokia_lcd_write_string("DOWN",2);
+				nokia_lcd_render();
+				quit = GetKeypadKey();
+				
+				
+				if(USART_HasReceived(0))
+				{
+					PORTA = 0x03;
+					receive1 = USART_Receive(0);
+					USART_Flush(0);
+				}
+				PORTA = 0x01;
 		break;
 		
 		case JJ_expand:
@@ -1344,18 +1461,9 @@ int SM1_Tick(int state){
 				nokia_lcd_set_cursor(0, 0);
 				nokia_lcd_write_string("EXPAND", 2);
 				nokia_lcd_render();
-				// 		USART_Flush(0);
-				// 		if(USART_IsSendReady(0))
-				// 		USART_Send(kpVal,0);
-				// 		while(!USART_HasTransmitted(0)){
-				// 			//wait until transmitted
-				// 		}
-				// 		USART_Flush(1);
-				// 		if(USART_IsSendReady(1))
-				// 		USART_Send(0x00,1);
-				// 		while(!USART_HasTransmitted(1)){
-				// 			//wait until transmitted
-				// 		}
+				quit = GetKeypadKey();
+				
+				
 				if(USART_HasReceived(1))
 				{
 					PORTA = 0x03;
@@ -1370,18 +1478,9 @@ int SM1_Tick(int state){
 						nokia_lcd_set_cursor(0, 0);
 						nokia_lcd_write_string("CLOSE", 2);
 						nokia_lcd_render();
-						// 		USART_Flush(0);
-						// 		if(USART_IsSendReady(0))
-						// 		USART_Send(kpVal,0);
-						// 		while(!USART_HasTransmitted(0)){
-						// 			//wait until transmitted
-						// 		}
-						// 		USART_Flush(1);
-						// 		if(USART_IsSendReady(1))
-						// 		USART_Send(0x00,1);
-						// 		while(!USART_HasTransmitted(1)){
-						// 			//wait until transmitted
-						// 		}
+						quit = GetKeypadKey();
+						
+						
 						if(USART_HasReceived(1))
 						{
 							PORTA = 0x03;
@@ -1396,18 +1495,9 @@ int SM1_Tick(int state){
 						nokia_lcd_set_cursor(0, 0);
 						nokia_lcd_write_string("UP", 3);
 						nokia_lcd_render();
-						// 		USART_Flush(0);
-						// 		if(USART_IsSendReady(0))
-						// 		USART_Send(kpVal,0);
-						// 		while(!USART_HasTransmitted(0)){
-						// 			//wait until transmitted
-						// 		}
-						// 		USART_Flush(1);
-						// 		if(USART_IsSendReady(1))
-						// 		USART_Send(0x00,1);
-						// 		while(!USART_HasTransmitted(1)){
-						// 			//wait until transmitted
-						// 		}
+						quit = GetKeypadKey();
+						
+						
 						if(USART_HasReceived(1))
 						{
 							PORTA = 0x03;
@@ -1422,18 +1512,9 @@ int SM1_Tick(int state){
 						nokia_lcd_set_cursor(0, 0);
 						nokia_lcd_write_string("DOWN", 2);
 						nokia_lcd_render();
-						// 		USART_Flush(0);
-						// 		if(USART_IsSendReady(0))
-						// 		USART_Send(kpVal,0);
-						// 		while(!USART_HasTransmitted(0)){
-						// 			//wait until transmitted
-						// 		}
-						// 		USART_Flush(1);
-						// 		if(USART_IsSendReady(1))
-						// 		USART_Send(0x00,1);
-						// 		while(!USART_HasTransmitted(1)){
-						// 			//wait until transmitted
-						// 		}
+						quit = GetKeypadKey();
+						
+						
 						if(USART_HasReceived(1))
 						{
 							PORTA = 0x03;
@@ -1449,9 +1530,7 @@ int SM1_Tick(int state){
 		nokia_lcd_write_string("GREAT", 2);
 		nokia_lcd_set_cursor(0,25);
 		nokia_lcd_write_string("WORKOUT",2);
-		nokia_lcd_render();
-
-		
+		nokia_lcd_render();		
 		break;
 		
 		case finish2:
@@ -1463,14 +1542,6 @@ int SM1_Tick(int state){
 		nokia_lcd_write_string(float_,2);
 		nokia_lcd_render();
 		break;
-		
-		// 		case weight:
-		//
-		// 		// 				x = ADC;
-		// 		// 				my_char = (char)x;
-		// 		// 				PORTD = my_char;
-		// 		// //				my_char=(char)(x>>8);
-		// 		break;
 		
 		default:
 		state=Init;
