@@ -1428,11 +1428,11 @@ int SM1_Tick(int state){
 				quit = GetKeypadKey();
 				
 				
-				if(USART_HasReceived(0))
+				if(USART_HasReceived(1))
 				{
 					PORTA = 0x03;
-					receive1 = USART_Receive(0);
-					USART_Flush(0);
+					receive1 = USART_Receive(1);
+					USART_Flush(1);
 				}
 				PORTA = 0x01;
 		break;
